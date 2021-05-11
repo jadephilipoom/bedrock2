@@ -39,6 +39,9 @@ Section WithParameters.
   Definition isMMIOAligned (n : nat) (addr : parameters.word) :=
     n = 4%nat /\ word.unsigned addr mod 4 = 0.
 
+  (* hardware spec : MMIO reads are always 0 *)
+  Definition read_valid (val : parameters.word) : Prop := val = word.of_Z 0.
+
   Definition ext_spec (t : bedrock2_trace) (mGive : parameters.mem) a (args: list parameters.word) (post:parameters.mem -> list parameters.word -> Prop) :=
     if String.eqb "MMIOWRITE" a then
       exists addr val,
@@ -49,7 +52,7 @@ Section WithParameters.
       exists addr,
         args = [addr] /\
         (mGive = Interface.map.empty /\ isMMIOAddr addr /\ word.unsigned addr mod 4 = 0) /\
-        forall val, post Interface.map.empty [val]
+        forall val, read_valid val -> post Interface.map.empty [val]
     else False.
 
   Global Instance semantics_parameters  : Semantics.parameters :=
@@ -75,7 +78,7 @@ Section WithParameters.
       | H: exists _, _ |- _ => destruct H
       | H: _ /\ _ |- _ => destruct H
       | H: False |- _ => destruct H
-    end; subst; eauto 8 using Properties.map.same_domain_refl.
+    end; subst; eauto 10 using Properties.map.same_domain_refl.
   Qed.
 
   Global Instance ok : Semantics.parameters_ok semantics_parameters.
