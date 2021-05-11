@@ -470,6 +470,7 @@ Section MMIO1.
       end.
       cbv [ext_spec FlatToRiscvCommon.Semantics_params FlatToRiscvCommon.ext_spec FE310CSemantics.ext_spec] in Ex.
       simpl in *|-.
+      assert (FE310CSemantics.read_valid (word.of_Z 0)) by reflexivity.
 
       rewrite E in *.
       destruct ("MMIOREAD" =? action)%string eqn:EE in Ex; try contradiction.
